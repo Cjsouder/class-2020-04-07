@@ -20,19 +20,76 @@ Today's class will be based on [Chapter 12: "Multiple Regression"](https://david
 
 **Prompt:** Recall the three common steps of exploring a new dataset: 1) looking at the raw data, 2) computing summary statistics, and 3) creating visualizations of the data. Start this process. Useful commands to use here: `glimpse()`,`sample_n`, and `skim` (from the skimr package). What observations are surprising? (Hints: Look at extremes, especially for the key variable you are interested in. Hint at the data for the schools you know.)  
 
+```{r 1, echo=FALSE}
+
+summary(x)
+
+```
+
+
 ### Scene 2
 
 **Prompt:** What's the correlation between the average faculty salary in 2001 and the median income of students 10 years after entering? What's the correlation between the average SAT scores in 2001 and the median income of students 10 years after entering? Find these by doing two separate correlations first, and then making a correlation matrix (instructions in the book). 
 
+```{r 2, echo=FALSE}
+
+fac_earn <- cor(x$faculty, x$earnings)
+```
+```{r}
+sat_earn <- cor(x$sat, x$earnings)
+
+
+
+```
+```{r}
+x %>%
+select(faculty, sat, earnings) %>% 
+  cor()
+
+```
 
 ### Scene 3
 
 **Prompt:** Visualize the relationships between the outcome variable (`earnings`) and the two key numerical explanatory variables (`faculty` and `sat`), one at a time. Create a ggplot for each showing the line of best fit.
 
+```{r}
 
+ggplot(x, aes(earnings, faculty)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE) 
+
+
+```
+
+```{r}
+ggplot(x, aes(earnings, sat)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
 ### Scene 4
 
 **Prompt:** Now let's quantify these relationships between the two explanatory variables and the outcome variable. Fit a multiple regression model for `earnings` using `sat` and `faculty` as the explanatory variables. Write a bullet point interpreting each of the three values in the estimate column. Do not use any interaction terms in the regression (yet).
+
+```{r 4, echo=FALSE}
+#ggplot(x, aes(x = earnings, y = faculty, color = sat)) +
+ # geom_point() +
+  #labs(x = "Earnings", y = "Faculty", color = "SAT") +
+  #geom_smooth(method = "lm", se = FALSE)
+
+
+model <- x %>% 
+  lm(earnings ~ faculty + sat, data = .)
+
+x %>%
+  tidy(conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
+
+```
+
+Estimate Meanings:
+Intercept-- if faculty and sat = 0, earnings
+Faculty -- for every extra dollar paid to staff, .385 increase in earning
+SAT -- for every point increase on the SAT, you add 24.5 dollars to earnings 
 
 
 ### Scene 5
@@ -40,9 +97,23 @@ Today's class will be based on [Chapter 12: "Multiple Regression"](https://david
 **Prompt:** Give a quick tour of your final project to the other students in your group. We will spend 10 minutes on this. Each student should, therefore, spend about N/10 minutes presenting. No worries if your project is a mess! No worries if the Shiny app does not work! We just want to have some useful conversations. Start with a quick one minute overview of your project. Then perhaps show one key plot or table which you have already created. I reserve the right to cold call a student and have her explain a classmate's project.
 
 
+
+
+
 ### Scene 6
 
 **Prompt:** Imagine that you are the university president. There's a global pandemic that is causing serious financial damage to the school endowment, and in response, you want to cut the financial aid budget. However, because many academically talented students will go to whichever school gives them the best financial aid package, slashing the financial aid budget will cause the average SAT score to decrease from 1400 to 1300. Apply the Rubin Causal Model to frame the causal effect of this policy change on the median earnings of students 10 years from now. Write down the units, the treatments, and the outcomes. Define the causal effect of the policy change on median earnings. What is the fundamental problem of causal inference? What must you assume for this causal model to make a causal claim?
+
+Units -- Earnings
+Treatment -- financial aid applied or financial aid cut
+Outcomes -- changes to expected Earnings as a result of treatment
+
+Causal Effect -- as financial aid decreases, earnings also decrease
+Must assume financial aid decreasing will in face reduce SAT scores, and that 
+SAT scores have causational influences on earnings
+Fundamental Problem - can't know for certain what the earnings would be in the
+counterfactual
+
 
 
 ### Scene 7
